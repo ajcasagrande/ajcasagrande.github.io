@@ -5,11 +5,18 @@ I want to take a chance to explore in depth how I increased the performance of a
 
 ## Background
 
-The `idf_size.py` script plays a critical role in the Espressif IoT Development Framework ([espressif/esp-idf](https://github.com/espressif/esp-idf)) by providing detailed insights into memory usage, including Instruction RAM (`IRAM`) and Data RAM (`DRAM`). These memory sections are essential for the ESP32's performance: `IRAM` is used for executing time-critical code, while `DRAM` stores variables and application data. Since both `IRAM` and `DRAM` are limited resources within the ESP32 microcontroller, efficient utilization is vital to maximizing performance. By analyzing and optimizing the memory footprint with tools like `idf_size.py`, developers can ensure their firmware operates smoothly and efficiently, even in resource-constrained environments.
+The `idf_size.py` script plays a critical role in the Espressif IoT Development Framework ([espressif/esp-idf](https://github.com/espressif/esp-idf)) by providing detailed insights into memory usage, including Instruction RAM (`IRAM`) and Data RAM (`DRAM`) usage. Optimizing these memory sections are essential for the ESP32's performance: `IRAM` is used for executing time-critical code, while `DRAM` stores variables and application data. Since both `IRAM` and `DRAM` are limited resources within the ESP32 microcontroller, efficient utilization is vital to maximizing performance.
 
-However, there’s a catch: as crucial as `idf_size.py` is, its performance issues had long been a source of frustration. Slow execution times, especially with large map files, wasted valuable developer time, and made frequent memory analysis a tedious task. Recognizing this issue, I set out to significantly enhance the script's performance, and the results were nothing short of transformative.
+![image](https://github.com/user-attachments/assets/bce7e422-0144-4537-b3dd-1162e955e119)
+_ESP32 internal memory (SRAM) layout_
+   (_image source: [espressif](https://developer.espressif.com/blog/esp32-programmers-memory-model/)_)
 
-## Current Code Performance
+
+However, there’s a catch: as important as knowning the memory usage is, `idf_size.py`'s performance issues had long been a source of frustration. Slow execution times, especially with large map files, wasted valuable developer time, and made frequent memory analysis a tedious task. Recognizing this issue, I set out to enhance the script's performance, and the results were nothing short of transformative.
+
+## Legacy Code Performance
+
+The following is a real comparision based on a 15MB firmware.map file for an IoT project based around home automation that I was working on at the time.
 
 **Input file size**
 ```shell
@@ -17,7 +24,7 @@ anthony@linux:~/esp/esp-idf/tools$ du -h /tmp/firmware.map
 15M    /tmp/firmware.map
 ```
 
-**Current code in master branch**
+**Legacy Code Performance**
 ```shell
 anthony@linux:~/esp/esp-idf/tools$ time ~/esp/esp-idf-master/tools/idf_size.py /tmp/firmware.map
 Total sizes:
@@ -34,12 +41,14 @@ user    0m19.395s
 sys     0m0.044s
 ```
 
+As you can clearly see, it took almost **20 seconds** for the software to parse my file. Something is definitely not right!
+
 #### In-Depth Analysis of Optimizations
 
 During my optimization process, I experimented with various methods to improve the script's speed. Below is an in-depth analysis of each method and how they affected the resulting speed:
 
 1. **Fixed Regex**:
-   The most significant performance gain came from fixing the `RE_SOURCE_LINE` regex. I noticed an extra unneeded wildcard after the symbol name, which slowed down the matching process. By removing this wildcard, the regex became more efficient.
+   The most significant performance gain came from fixing the `RE_SOURCE_LINE` regex. I noticed an extra unneeded wildcard after the symbol name, which slowed down the matching process. By removing this wildcard, the regex became immensly more efficient.
 
    ```python
                                           |
@@ -92,18 +101,18 @@ sys     0m0.024s
 
 I conducted extensive benchmarking to measure the impact of each optimization. The following table summarizes the results:
 
-| Pre-Filter | Early Exit | Fixed Regex | Avg Millis |
-|------------|------------|-------------|------------|
-| ✓          | ✓          | ✓           | 375        |
-| ⨯          | ✓          | ✓           | 561        |
-| ✓          | ⨯          | ✓           | 505        |
-| ⨯          | ⨯          | ✓           | 675        |
-| ✓          | ✓          | ⨯           | 1291       |
-| ⨯          | ✓          | ⨯           | 4672       |
-| ✓          | ⨯          | ⨯           | 6023       |
-| ⨯          | ⨯          | ⨯           | 9294       |
+| Pre-Filter | Early Exit | Optimized Regex | Avg Milliseconds |
+|------------:|------------:|-------------:|------------:|
+| ✅          | ✅          | ✅           | 375        |
+| ❌          | ✅          | ✅           | 561        |
+| ✅          | ❌          | ✅           | 505        |
+| ❌          | ❌          | ✅           | 675        |
+| ✅          | ✅          | ❌           | 1291       |
+| ❌          | ✅          | ❌           | 4672       |
+| ✅          | ❌          | ❌           | 6023       |
+| ❌          | ❌          | ❌           | 9294       |
 
-As you can see, the fixed regex provided the most significant performance gain. Without the fixed regex, the pre-filter and early exit mechanisms made a much larger difference. Combining all three optimizations resulted in the best performance, reducing the execution time to just 375 milliseconds.
+As you can see, the fixed regex provided the most significant performance gain. Without the fixed regex, the pre-filter and early exit mechanisms made a much larger difference. Combining all three optimizations resulted in the best performance, reducing the execution time to just 375 milliseconds!
 
 #### Conclusion
 
