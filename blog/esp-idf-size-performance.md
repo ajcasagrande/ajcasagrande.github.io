@@ -1,4 +1,4 @@
-# How I Increased the Performance of an Open Source Python Script by 50x
+# How I Made an Open Source Python Script Run 50x Faster
 
 I want to take a chance to explore in depth how I increased the performance of a python script by **50x** (Yes, 50 times faster) within
  a very popular open source repository with over 14.3k stars on GitHub.
@@ -16,7 +16,7 @@ However, there’s a catch: as important as knowning the memory usage is, `idf_s
 
 ## Legacy Code Performance
 
-The following is a real comparision based on a 15MB firmware.map file for an IoT project based around home automation that I was working on at the time.
+The following is a real comparision based on a 15MB `firmware.map` file for an IoT project based around home automation that I was working on at the time.
 
 **Input file size**
 ```shell
@@ -47,7 +47,7 @@ As you can clearly see, it took almost **20 seconds** for the software to parse 
 
 During my optimization process, I experimented with various methods to improve the script's speed. Below is an in-depth analysis of each method and how they affected the resulting speed:
 
-1. **Fixed Regex**:
+1. **Optimized Regex**:
    The most significant performance gain came from fixing the `RE_SOURCE_LINE` regex. I noticed an extra unneeded wildcard after the symbol name, which slowed down the matching process. By removing this wildcard, the regex became immensly more efficient.
 
    ```python
@@ -112,13 +112,14 @@ I conducted extensive benchmarking to measure the impact of each optimization. T
 | ✅          | ❌          | ❌           | 6023       |
 | ❌          | ❌          | ❌           | 9294       |
 
-As you can see, the fixed regex provided the most significant performance gain. Without the fixed regex, the pre-filter and early exit mechanisms made a much larger difference. Combining all three optimizations resulted in the best performance, reducing the execution time to just 375 milliseconds!
+As you can see, the optimized regex provided the most significant performance gain. Without the fixed regex, the pre-filter and early exit mechanisms made a much larger difference. Combining all three optimizations resulted in the best performance, reducing the execution time to just 375 milliseconds!
 
 #### Conclusion
 
-I am pleased with the results of these performance improvements. Reducing the execution time from 19.4 seconds to just 0.4 seconds is a remarkable achievement. This optimization not only enhances the script's efficiency but also improves the overall developer experience when working with large map files in the Espressif IoT Development Framework.
+I am very pleased with the results of these performance improvements. Reducing the execution time from 19.44 seconds to just 0.385 seconds is a remarkable achievement. This optimization not only enhances the script's efficiency but also improves the overall developer experience when working with large map files in the Espressif IoT Development Framework. With performance numbers like this, it made it possible to
+run the script after every compilation.
 
-Thank you for reading. I hope these improvements make your development process smoother and more enjoyable. Feel free to check out the [PR #4518](https://github.com/espressif/esp-idf/pull/4518) for more details and to see the code changes.
+Thank you for reading. I hope these insights have inspired you to do the same! Feel free to check out the [PR #4518](https://github.com/espressif/esp-idf/pull/4518) for more details and to see the code changes.
 
 Let's continue to make our tools faster and better together!
 
