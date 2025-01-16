@@ -5,10 +5,9 @@ I want to take a chance to explore in depth how I increased the performance of a
 
 ## Background
 
-`idf_size.py` is a script in the Espressif IoT Development Framework ([espressif/esp-idf](https://github.com/espressif/esp-idf)),
-which is an essential tool for analyzing the sizes of different sections in the firmware's ELF file and linker map file. 
-It provides detailed information on memory usage, which is crucial for optimizing firmware for Espressif SoCs. However, the script's performance was suboptimal, 
-especially when handling large map files. For instance, processing a 15 MB map file took approximately **20 seconds** with the existing implementation.
+The `idf_size.py` script plays a critical role in the Espressif IoT Development Framework ([espressif/esp-idf](https://github.com/espressif/esp-idf)) by providing detailed insights into memory usage, including Instruction RAM (`IRAM`) and Data RAM (`DRAM`). These memory sections are essential for the ESP32's performance: `IRAM` is used for executing time-critical code, while `DRAM` stores variables and application data. Since both `IRAM` and `DRAM` are limited resources within the ESP32 microcontroller, efficient utilization is vital to maximizing performance. By analyzing and optimizing the memory footprint with tools like `idf_size.py`, developers can ensure their firmware operates smoothly and efficiently, even in resource-constrained environments.
+
+However, there’s a catch: as crucial as `idf_size.py` is, its performance issues had long been a source of frustration. Slow execution times, especially with large map files, wasted valuable developer time, and made frequent memory analysis a tedious task. Recognizing this issue, I set out to significantly enhance the script's performance, and the results were nothing short of transformative.
 
 ## Current Code Performance
 
