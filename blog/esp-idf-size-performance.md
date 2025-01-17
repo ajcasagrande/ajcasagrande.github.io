@@ -144,8 +144,9 @@ Execution time reduced from 19.44 seconds to **0.385 seconds**!
 
 ## Real-World Impact
 
-These optimizations made it feasible to run `idf_size.py` after every build, saving developers countless hours and enabling faster feedback loops.
+These optimizations made it feasible to run `idf_size.py` after every build, saving developers countless hours and enabling faster feedback loops. I then created informative visual representations for developers to easily see where the memory was being allocated.
 
+![Screenshot From 2025-01-16 18-37-34](https://github.com/user-attachments/assets/88f97cc3-e55a-4bc7-b8b0-f3c265f67bc6)
 
 
 ## Conclusion
